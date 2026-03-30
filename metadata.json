@@ -1,0 +1,5 @@
+{
+  "name": "Beff’s Africa Consulting Group",
+  "description": "Agence de conseil éducatif spécialisée dans l'accompagnement des étudiants africains pour leurs études à l'international.",
+  "requestFramePermissions": ["geolocation"]
+}
