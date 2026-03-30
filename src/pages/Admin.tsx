@@ -336,7 +336,7 @@ export default function Admin() {
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex pt-20 overflow-hidden">
+    <div className="h-screen bg-gray-50 flex pt-24 overflow-hidden">
       
       {/* Confirmation Modal */}
       {showConfirm && (

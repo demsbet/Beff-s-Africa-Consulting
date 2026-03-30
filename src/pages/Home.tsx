@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[800px] flex items-center overflow-hidden bg-gray-900">
+      <section className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-gray-900 pt-32 pb-12">
         <div className="absolute inset-0 z-0">
           <img
             src={siteConfig.hero_image_url || "https://picsum.photos/seed/education/1920/1080?blur=2"}
@@ -33,16 +33,13 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-40 lg:pb-64">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1 flex items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-2xl"
+            className="max-w-2xl py-12"
           >
-            <span className="inline-block py-1 px-3 rounded-full bg-primary/20 text-primary text-sm font-semibold mb-6 border border-primary/30">
-              Conseil Éducatif à Douala
-            </span>
             <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
               {siteConfig.hero_title || "Ouvrir les portes du monde à la jeunesse africaine"}
             </h1>
@@ -70,8 +67,8 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Floating Stats */}
-        <div className="absolute bottom-6 left-0 right-0 z-10 hidden lg:block">
+        {/* Floating Stats - Now in flow for better responsiveness */}
+        <div className="relative z-10 hidden lg:block pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-3 gap-8 bg-white/5 backdrop-blur-xl border border-white/10 py-10 px-8 rounded-3xl">
               <div className="text-center border-r border-white/10">
