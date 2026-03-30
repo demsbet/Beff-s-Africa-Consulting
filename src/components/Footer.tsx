@@ -97,30 +97,50 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Contact</h3>
-            <ul className="space-y-4 text-gray-400 text-sm">
-              <li className="flex items-start space-x-3">
-                <MapPin size={18} className="text-primary shrink-0" />
-                <span>{siteConfig.address}</span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <Phone size={18} className="text-primary shrink-0" />
-                <span>{siteConfig.phone}</span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <Mail size={18} className="text-primary shrink-0" />
-                <span>{siteConfig.email}</span>
-              </li>
-              <li className="pt-2">
-                <a
-                  href={siteConfig.whatsapp}
-                  className="inline-flex items-center space-x-2 text-primary hover:text-primary-hover font-medium"
+            <h3 className="text-lg font-semibold mb-6">Nos Succursales</h3>
+            <div className="space-y-6">
+              {(siteConfig.branches || []).length > 0 ? (
+                (siteConfig.branches || []).map((branch) => (
+                  <div key={branch.id} className="space-y-2">
+                    <h4 className="text-primary font-bold text-xs uppercase tracking-widest">{branch.country}</h4>
+                    <ul className="space-y-2 text-gray-400 text-xs">
+                      <li className="flex items-start space-x-2">
+                        <MapPin size={14} className="text-primary shrink-0 mt-0.5" />
+                        <span>{branch.address}</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <Phone size={14} className="text-primary shrink-0" />
+                        <span>{branch.phone}</span>
+                      </li>
+                    </ul>
+                  </div>
+                ))
+              ) : (
+                <ul className="space-y-4 text-gray-400 text-sm">
+                  <li className="flex items-start space-x-3">
+                    <MapPin size={18} className="text-primary shrink-0" />
+                    <span>{siteConfig.address}</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <Phone size={18} className="text-primary shrink-0" />
+                    <span>{siteConfig.phone}</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <Mail size={18} className="text-primary shrink-0" />
+                    <span>{siteConfig.email}</span>
+                  </li>
+                </ul>
+              )}
+              <div className="pt-2">
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center space-x-2 text-primary hover:text-primary-hover font-medium text-sm"
                 >
                   <MessageCircle size={18} />
-                  <span>Discuter sur WhatsApp</span>
-                </a>
-              </li>
-            </ul>
+                  <span>Tous nos contacts</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 

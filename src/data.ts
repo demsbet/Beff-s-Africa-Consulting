@@ -6,6 +6,35 @@ export const siteConfig: SiteConfig = {
   phone: "+237 6 92 44 98 74",
   whatsapp: "https://wa.me/237676140933",
   email: "contact@beffsafrica.com",
+  branches: [
+    {
+      id: "cmr",
+      country: "Cameroun",
+      city: "Douala",
+      address: "Bonamoussadi, Ancienne Mairie, 3ème étage",
+      phone: "+237 6 92 44 98 74",
+      whatsapp: "https://wa.me/237676140933",
+      email: "contact@beffsafrica.com"
+    },
+    {
+      id: "gab",
+      country: "Gabon",
+      city: "Libreville",
+      address: "Libreville, Centre-ville",
+      phone: "+241 00 00 00 00",
+      whatsapp: "https://wa.me/24100000000",
+      email: "gabon@beffsafrica.com"
+    },
+    {
+      id: "civ",
+      country: "Côte d'Ivoire",
+      city: "Abidjan",
+      address: "Abidjan, Cocody",
+      phone: "+225 00 00 00 00",
+      whatsapp: "https://wa.me/22500000000",
+      email: "civ@beffsafrica.com"
+    }
+  ],
   socials: {
     facebook: "https://facebook.com/beffsafrica",
     instagram: "https://instagram.com/beffsafrica",

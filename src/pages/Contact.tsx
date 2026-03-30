@@ -22,35 +22,51 @@ export default function Contact() {
           {/* Contact Info */}
           <div className="space-y-12">
             <div className="bg-white p-10 rounded-[2rem] shadow-xl border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">Nos Coordonnées</h2>
-              <div className="space-y-8">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center shrink-0">
-                    <MapPin size={24} />
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">Nos Succursales</h2>
+              <div className="space-y-10">
+                {(siteConfig.branches || []).map((branch) => (
+                  <div key={branch.id} className="pb-8 border-b border-gray-100 last:border-0 last:pb-0">
+                    <h3 className="text-lg font-bold text-primary mb-4 flex items-center space-x-2">
+                      <Globe size={20} />
+                      <span>{branch.country} — {branch.city}</span>
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-4">
+                        <div className="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center shrink-0">
+                          <MapPin size={20} />
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">{branch.address}</p>
+                      </div>
+                      <div className="flex items-start space-x-4">
+                        <div className="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center shrink-0">
+                          <Phone size={20} />
+                        </div>
+                        <p className="text-gray-600 text-sm">{branch.phone}</p>
+                      </div>
+                      {branch.email && (
+                        <div className="flex items-start space-x-4">
+                          <div className="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center shrink-0">
+                            <Mail size={20} />
+                          </div>
+                          <p className="text-gray-600 text-sm">{branch.email}</p>
+                        </div>
+                      )}
+                      {branch.whatsapp && (
+                        <a 
+                          href={branch.whatsapp} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-4 text-sm text-secondary font-bold hover:underline"
+                        >
+                          <div className="w-10 h-10 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center shrink-0">
+                            <MessageCircle size={20} />
+                          </div>
+                          <span>WhatsApp {branch.city}</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-1">Notre Agence</h4>
-                    <p className="text-gray-600">{siteConfig.address}</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center shrink-0">
-                    <Phone size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-1">Téléphone</h4>
-                    <p className="text-gray-600">{siteConfig.phone}</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center shrink-0">
-                    <Mail size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-1">Email</h4>
-                    <p className="text-gray-600">{siteConfig.email}</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="mt-12 pt-12 border-t border-gray-100">

@@ -38,6 +38,17 @@ export interface Destination {
   featured?: boolean;
 }
 
+export interface Branch {
+  id: string;
+  country: string;
+  city: string;
+  address: string;
+  phone: string;
+  whatsapp?: string;
+  email?: string;
+  map_url?: string;
+}
+
 export interface SiteConfig {
   name: string;
   logo_url?: string;
@@ -50,6 +61,7 @@ export interface SiteConfig {
   phone: string;
   whatsapp: string;
   email: string;
+  branches?: Branch[];
   socials: {
     facebook?: string;
     instagram?: string;

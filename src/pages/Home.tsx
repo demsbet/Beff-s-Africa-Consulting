@@ -33,7 +33,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20 lg:pb-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export default function Home() {
             <p className="text-xl text-gray-300 mb-10 leading-relaxed">
               {siteConfig.name} accompagne les étudiants et jeunes professionnels africains dans leurs projets d’études et de carrière à l’international.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-20 lg:mb-12">
               <Link
                 to="/contact"
                 className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center space-x-2 hover:bg-primary-hover transition-all transform hover:scale-105"
@@ -71,9 +71,9 @@ export default function Home() {
         </div>
 
         {/* Floating Stats */}
-        <div className="absolute bottom-12 left-0 right-0 z-10 hidden lg:block">
+        <div className="absolute bottom-6 left-0 right-0 z-10 hidden lg:block">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-3 gap-8 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl">
+            <div className="grid grid-cols-3 gap-8 bg-white/5 backdrop-blur-xl border border-white/10 py-10 px-8 rounded-3xl">
               <div className="text-center border-r border-white/10">
                 <div className="text-3xl font-bold text-primary mb-1">98%</div>
                 <div className="text-sm text-gray-400 uppercase tracking-widest">Taux de réussite visa</div>
