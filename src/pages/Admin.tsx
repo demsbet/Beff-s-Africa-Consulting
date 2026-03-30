@@ -83,6 +83,7 @@ enum OperationType {
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(localStorage.getItem('admin_authenticated') === 'true');
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isEditing, setIsEditing] = useState<string | boolean>(false); // false, 'new', or docId
@@ -181,14 +182,15 @@ export default function Admin() {
     toast.error(`Erreur lors de l'opération ${operationType} sur ${path}`);
   };
 
-  const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/admin'
-      }
-    });
-    if (error) toast.error('Échec de la connexion');
+  const handlePasswordLogin = () => {
+    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
+    if (password === correctPassword) {
+      localStorage.setItem('admin_authenticated', 'true');
+      setIsAdminAuthenticated(true);
+      toast.success('Accès autorisé');
+    } else {
+      toast.error('Mot de passe incorrect');
+    }
   };
 
   const handleLogout = async () => {
@@ -295,7 +297,7 @@ export default function Admin() {
     );
   }
 
-  if (!user && !isAdminAuthenticated) {
+  if (!isAdminAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
         <div className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full text-center space-y-6">
@@ -303,15 +305,27 @@ export default function Admin() {
             <Settings size={40} />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Accès Administrateur</h1>
-          <p className="text-gray-500">Veuillez vous connecter avec votre compte Google autorisé ou utiliser le mot de passe de maintenance.</p>
+          <p className="text-gray-500">Veuillez entrer le mot de passe administrateur pour accéder à la console de gestion.</p>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 block text-left">Mot de passe</label>
+              <input 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePasswordLogin()}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none"
+                placeholder="Entrez le mot de passe"
+              />
+            </div>
+            
             <button 
-              onClick={handleLogin}
+              onClick={handlePasswordLogin}
               className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-3 hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
             >
               <LogIn size={20} />
-              <span>Se connecter avec Google</span>
+              <span>Se connecter</span>
             </button>
             
             <div className="relative py-2">
@@ -328,7 +342,7 @@ export default function Admin() {
           </div>
 
           <p className="text-xs text-gray-400">
-            Note: Si la connexion Google échoue, assurez-vous que le fournisseur est activé dans votre console Supabase.
+            Note: L'accès est réservé aux administrateurs autorisés.
           </p>
         </div>
       </div>
