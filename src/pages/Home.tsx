@@ -33,7 +33,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20 lg:pb-32">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-40 lg:pb-64">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -47,9 +47,9 @@ export default function Home() {
               {siteConfig.hero_title || "Ouvrir les portes du monde à la jeunesse africaine"}
             </h1>
             <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-              {siteConfig.name} accompagne les étudiants et jeunes professionnels africains dans leurs projets d’études et de carrière à l’international.
+              {siteConfig.hero_description || `${siteConfig.name} accompagne les étudiants et jeunes professionnels africains dans leurs projets d’études et de carrière à l’international.`}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 mb-20 lg:mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <Link
                 to="/contact"
                 className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center space-x-2 hover:bg-primary-hover transition-all transform hover:scale-105"
@@ -75,15 +75,15 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-3 gap-8 bg-white/5 backdrop-blur-xl border border-white/10 py-10 px-8 rounded-3xl">
               <div className="text-center border-r border-white/10">
-                <div className="text-3xl font-bold text-primary mb-1">98%</div>
+                <div className="text-3xl font-bold text-primary mb-1">{siteConfig.stats?.success_rate || "98%"}</div>
                 <div className="text-sm text-gray-400 uppercase tracking-widest">Taux de réussite visa</div>
               </div>
               <div className="text-center border-r border-white/10">
-                <div className="text-3xl font-bold text-primary mb-1">50+</div>
+                <div className="text-3xl font-bold text-primary mb-1">{siteConfig.stats?.partners_count || "50+"}</div>
                 <div className="text-sm text-gray-400 uppercase tracking-widest">Écoles partenaires</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-1">500+</div>
+                <div className="text-3xl font-bold text-primary mb-1">{siteConfig.stats?.students_count || "500+"}</div>
                 <div className="text-sm text-gray-400 uppercase tracking-widest">Étudiants accompagnés</div>
               </div>
             </div>
@@ -102,21 +102,21 @@ export default function Home() {
               className="relative"
             >
               <img
-                src="https://picsum.photos/seed/consulting/800/1000"
+                src={siteConfig.mission_image_url || "https://picsum.photos/seed/consulting/800/1000"}
                 alt="Consulting Session"
                 className="rounded-3xl shadow-2xl"
                 referrerPolicy="no-referrer"
               />
               <div className="absolute -bottom-8 -right-8 bg-secondary text-gray-900 p-8 rounded-3xl shadow-xl hidden md:block">
-                <p className="text-2xl font-bold italic">"De Douala vers le monde, pas à pas."</p>
+                <p className="text-2xl font-bold italic">"{siteConfig.mission_quote || "De Douala vers le monde, pas à pas."}"</p>
               </div>
             </motion.div>
             <div className="space-y-8">
               <h2 className="text-4xl font-bold text-gray-900 leading-tight">
-                Un accompagnement <span className="text-primary">sur mesure</span>, humain et inspirant.
+                {siteConfig.mission_title || "Un accompagnement sur mesure, humain et inspirant."}
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Notre mission est d'ouvrir les portes du monde à la jeunesse africaine. Nous croyons que chaque étudiant mérite une chance de briller à l'international, et nous mettons tout en œuvre pour sécuriser ce parcours.
+                {siteConfig.mission_text || "Notre mission est d'ouvrir les portes du monde à la jeunesse africaine. Nous croyons que chaque étudiant mérite une chance de briller à l'international, et nous mettons tout en œuvre pour sécuriser ce parcours."}
               </p>
               <ul className="space-y-4">
                 {[

@@ -19,9 +19,14 @@ export default function Footer() {
     const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
     
     if (adminPassword === correctPassword) {
+      localStorage.setItem('admin_authenticated', 'true');
       setIsAdminOpen(false);
       setAdminPassword('');
-      navigate('/admin');
+      if (window.location.pathname === '/admin') {
+        window.location.reload();
+      } else {
+        navigate('/admin');
+      }
     } else {
       toast.error('Mot de passe incorrect');
     }

@@ -1,8 +1,13 @@
 import React from "react";
 import { motion } from "motion/react";
 import { CheckCircle, Target, Eye, Heart, MapPin } from "lucide-react";
+import { useFirebaseData } from "../lib/hooks";
+import { siteConfig as staticSiteConfig } from "../data";
 
 export default function About() {
+  const { siteConfig: fbSiteConfig } = useFirebaseData();
+  const siteConfig = fbSiteConfig || staticSiteConfig;
+
   return (
     <div className="pt-32 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,14 +19,14 @@ export default function About() {
               Votre partenaire de confiance pour <span className="text-primary">réussir</span> à l'international.
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
-              Beff’s Africa Consulting est une agence africaine dédiée aux projets d’études et de carrière à l’international. Basée à Douala, nous sommes le pont entre vos ambitions et les meilleures opportunités mondiales.
+              {siteConfig.about_text || `${siteConfig.name} est une agence africaine dédiée aux projets d’études et de carrière à l’international. Basée à Douala, nous sommes le pont entre vos ambitions et les meilleures opportunités mondiales.`}
             </p>
             <div className="flex items-center space-x-4 p-6 bg-primary/5 rounded-3xl border border-primary/10">
               <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shrink-0">
                 <MapPin size={24} />
               </div>
               <p className="text-primary font-medium">
-                Siège social à Douala, Cameroun — Présence active en Afrique Centrale et de l'Ouest.
+                Siège social à {siteConfig.address || "Douala, Cameroun"} — Présence active en Afrique Centrale et de l'Ouest.
               </p>
             </div>
           </div>
@@ -29,7 +34,7 @@ export default function About() {
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-secondary/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
             <img
-              src="https://picsum.photos/seed/about-hero/800/1000"
+              src={siteConfig.about_image_url || "https://picsum.photos/seed/about-hero/800/1000"}
               alt="Team at work"
               className="relative z-10 rounded-[3rem] shadow-2xl"
               referrerPolicy="no-referrer"

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { 
   LayoutDashboard, FileText, Users, MessageSquare, Settings, 
-  Plus, Edit, Trash2, Save, X, LogIn, LogOut, Globe, Image as ImageIcon,
+  Plus, Edit, Trash2, Save, X, LogIn, LogOut, Globe, MapPin, Image as ImageIcon,
   Loader2, AlertCircle, CheckCircle2
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { supabase } from "../lib/supabase";
-import { Service, Testimonial, BlogPost, SiteConfig, Destination } from "../types";
+import { Service, Testimonial, BlogPost, SiteConfig, Destination, Branch } from "../types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
@@ -82,6 +82,7 @@ enum OperationType {
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(localStorage.getItem('admin_authenticated') === 'true');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isEditing, setIsEditing] = useState<string | boolean>(false); // false, 'new', or docId
@@ -93,6 +94,7 @@ export default function Admin() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
 
   // Form states
@@ -111,6 +113,9 @@ export default function Admin() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch(err => {
+      console.error("Auth session error:", err);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -122,28 +127,36 @@ export default function Admin() {
 
   // Real-time listeners
   useEffect(() => {
-    if (!user || !isSupabaseConfigured) return;
+    if ((!user && !isAdminAuthenticated) || !isSupabaseConfigured) return;
 
     const fetchData = async () => {
-      const [
-        { data: servicesData },
-        { data: testimonialsData },
-        { data: blogData },
-        { data: destinationsData },
-        { data: configData }
-      ] = await Promise.all([
-        supabase.from('services').select('*').order('order', { ascending: true }),
-        supabase.from('testimonials').select('*').order('created_at', { ascending: false }),
-        supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
-        supabase.from('destinations').select('*').order('created_at', { ascending: false }),
-        supabase.from('site_config').select('*').eq('id', 1).single()
-      ]);
+      try {
+        const [
+          { data: servicesData },
+          { data: testimonialsData },
+          { data: blogData },
+          { data: destinationsData },
+          { data: branchesData },
+          { data: configData }
+        ] = await Promise.all([
+          supabase.from('services').select('*').order('order', { ascending: true }),
+          supabase.from('testimonials').select('*').order('created_at', { ascending: false }),
+          supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
+          supabase.from('destinations').select('*').order('created_at', { ascending: false }),
+          supabase.from('branches').select('*').order('country', { ascending: true }),
+          supabase.from('site_config').select('*').eq('id', 1).single()
+        ]);
 
-      if (servicesData) setServices(servicesData as Service[]);
-      if (testimonialsData) setTestimonials(testimonialsData as Testimonial[]);
-      if (blogData) setBlogPosts(blogData as BlogPost[]);
-      if (destinationsData) setDestinations(destinationsData as Destination[]);
-      if (configData) setSiteConfig(configData as SiteConfig);
+        if (servicesData) setServices(servicesData as Service[]);
+        if (testimonialsData) setTestimonials(testimonialsData as Testimonial[]);
+        if (blogData) setBlogPosts(blogData as BlogPost[]);
+        if (destinationsData) setDestinations(destinationsData as Destination[]);
+        if (branchesData) setBranches(branchesData as Branch[]);
+        if (configData) setSiteConfig(configData as SiteConfig);
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Erreur lors du chargement des données");
+      }
     };
 
     fetchData();
@@ -154,13 +167,14 @@ export default function Admin() {
       supabase.channel('admin-testimonials').on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, fetchData).subscribe(),
       supabase.channel('admin-blog').on('postgres_changes', { event: '*', schema: 'public', table: 'blog_posts' }, fetchData).subscribe(),
       supabase.channel('admin-destinations').on('postgres_changes', { event: '*', schema: 'public', table: 'destinations' }, fetchData).subscribe(),
+      supabase.channel('admin-branches').on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, fetchData).subscribe(),
       supabase.channel('admin-config').on('postgres_changes', { event: '*', schema: 'public', table: 'site_config' }, fetchData).subscribe(),
     ];
 
     return () => {
       channels.forEach(channel => channel.unsubscribe());
     };
-  }, [user]);
+  }, [user, isAdminAuthenticated, isSupabaseConfigured]);
 
   const handleSupabaseError = (error: any, operationType: string, path: string | null) => {
     console.error('Supabase Error: ', error);
@@ -179,6 +193,8 @@ export default function Admin() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('admin_authenticated');
+    setIsAdminAuthenticated(false);
     toast.success('Déconnecté avec succès');
   };
 
@@ -245,7 +261,8 @@ export default function Admin() {
     { id: "testimonials", name: "Témoignages", icon: Users },
     { id: "blog", name: "Blog", icon: FileText },
     { id: "destinations", name: "Destinations", icon: Globe },
-    { id: "contact", name: "Infos Site & Contact", icon: MessageSquare },
+    { id: "branches", name: "Succursales", icon: MapPin },
+    { id: "contact", name: "Configuration du Site", icon: MessageSquare },
   ];
 
   if (loading) {
@@ -278,7 +295,7 @@ export default function Admin() {
     );
   }
 
-  if (!user) {
+  if (!user && !isAdminAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
         <div className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full text-center space-y-6">
@@ -286,21 +303,40 @@ export default function Admin() {
             <Settings size={40} />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Accès Administrateur</h1>
-          <p className="text-gray-500">Veuillez vous connecter avec votre compte Google autorisé pour gérer le site.</p>
-          <button 
-            onClick={handleLogin}
-            className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-3 hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
-          >
-            <LogIn size={20} />
-            <span>Se connecter avec Google</span>
-          </button>
+          <p className="text-gray-500">Veuillez vous connecter avec votre compte Google autorisé ou utiliser le mot de passe de maintenance.</p>
+          
+          <div className="space-y-3">
+            <button 
+              onClick={handleLogin}
+              className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-3 hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+            >
+              <LogIn size={20} />
+              <span>Se connecter avec Google</span>
+            </button>
+            
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-gray-400">Ou</span></div>
+            </div>
+
+            <button 
+              onClick={() => window.location.href = '/'}
+              className="w-full bg-gray-100 text-gray-600 py-4 rounded-xl font-bold flex items-center justify-center space-x-3 hover:bg-gray-200 transition-all"
+            >
+              <span>Retour au site</span>
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-400">
+            Note: Si la connexion Google échoue, assurez-vous que le fournisseur est activé dans votre console Supabase.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex pt-20">
+    <div className="h-screen bg-gray-50 flex pt-20 overflow-hidden">
       
       {/* Confirmation Modal */}
       {showConfirm && (
@@ -332,12 +368,12 @@ export default function Admin() {
       )}
 
       {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-gray-200 hidden md:block">
+      <aside className="w-72 bg-white border-r border-gray-200 hidden md:flex flex-col h-full">
         <div className="p-8 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">Beff's Africa</h2>
           <p className="text-xs text-gray-400 uppercase tracking-widest mt-1 font-semibold">Console de Gestion</p>
         </div>
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -354,12 +390,22 @@ export default function Admin() {
             </button>
           ))}
         </nav>
-        <div className="absolute bottom-0 w-72 p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 mt-auto">
           <div className="flex items-center space-x-3 px-4 py-3 mb-4">
-            <img src={user.user_metadata?.avatar_url || ""} alt="" className="w-8 h-8 rounded-full" />
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <Settings size={16} />
+              )}
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-900 truncate">{user.user_metadata?.full_name}</p>
-              <p className="text-xs text-gray-400 truncate">{user.email}</p>
+              <p className="text-sm font-bold text-gray-900 truncate">
+                {user?.user_metadata?.full_name || "Administrateur"}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {user?.email || "Mode Maintenance"}
+              </p>
             </div>
           </div>
           <button 
@@ -545,6 +591,45 @@ export default function Admin() {
                   </>
                 )}
 
+                {activeTab === 'branches' && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Pays</label>
+                        <input required type="text" value={formData.country || ''} onChange={e => setFormData({...formData, country: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" placeholder="Cameroun, Gabon..." />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Ville</label>
+                        <input required type="text" value={formData.city || ''} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" placeholder="Douala, Libreville..." />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-gray-700">Adresse complète</label>
+                      <input required type="text" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Téléphone</label>
+                        <input required type="text" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">WhatsApp (optionnel)</label>
+                        <input type="text" value={formData.whatsapp || ''} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Email (optionnel)</label>
+                        <input type="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">URL Google Maps (optionnel)</label>
+                        <input type="text" value={formData.map_url || ''} onChange={e => setFormData({...formData, map_url: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <div className="flex justify-end space-x-4 pt-6 border-t border-gray-100">
                   <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-colors">Annuler</button>
                   <button 
@@ -567,6 +652,7 @@ export default function Admin() {
                     { label: "Témoignages", count: testimonials.length, icon: Users, color: "bg-purple-500" },
                     { label: "Articles", count: blogPosts.length, icon: FileText, color: "bg-orange-500" },
                     { label: "Destinations", count: destinations.length, icon: Globe, color: "bg-green-500" },
+                    { label: "Succursales", count: branches.length, icon: MapPin, color: "bg-red-500" },
                   ].map((stat, i) => (
                     <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group">
                       <div className={cn("absolute -right-4 -top-4 w-24 h-24 rounded-full opacity-10 transition-transform group-hover:scale-110", stat.color)}></div>
@@ -633,43 +719,84 @@ export default function Admin() {
               )}
 
               {activeTab === "contact" && (
-                <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-                  <form onSubmit={handleSave} className="space-y-10">
+                <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-gray-100">
+                  <form onSubmit={handleSave} className="space-y-12">
                     <section className="space-y-6">
                       <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
                         <Globe size={20} className="text-primary" />
-                        <span>Identité Visuelle & Hero</span>
+                        <span>Identité & Hero Accueil</span>
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <ImageUpload 
-                          label="Logo de l'agence" 
-                          currentImage={formData.logo_url || siteConfig?.logo_url} 
-                          onUpload={(url) => setFormData({...formData, logo_url: url})} 
-                        />
-                        <ImageUpload 
-                          label="Image Hero" 
-                          currentImage={formData.hero_image_url || siteConfig?.hero_image_url} 
-                          onUpload={(url) => setFormData({...formData, hero_image_url: url})} 
-                        />
-                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="text-sm font-bold text-gray-700">Nom de l'agence</label>
+                          <label className="text-sm font-bold text-gray-700">Nom de l'Agence</label>
                           <input type="text" value={formData.name || siteConfig?.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-bold text-gray-700">Ou URL Logo</label>
-                          <input type="text" value={formData.logo_url || siteConfig?.logo_url || ''} onChange={e => setFormData({...formData, logo_url: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
-                        </div>
+                        <ImageUpload label="Logo du Site" currentImage={formData.logo_url || siteConfig?.logo_url} onUpload={url => setFormData({...formData, logo_url: url})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">Titre Hero</label>
+                        <label className="text-sm font-bold text-gray-700">Titre Hero Accueil</label>
                         <input type="text" value={formData.hero_title || siteConfig?.hero_title || ''} onChange={e => setFormData({...formData, hero_title: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">Ou URL Image Hero</label>
-                        <input type="text" value={formData.hero_image_url || siteConfig?.hero_image_url || ''} onChange={e => setFormData({...formData, hero_image_url: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        <label className="text-sm font-bold text-gray-700">Description Hero Accueil</label>
+                        <textarea value={formData.hero_description || siteConfig?.hero_description || ''} onChange={e => setFormData({...formData, hero_description: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none h-24" />
                       </div>
+                      <ImageUpload label="Image Hero Accueil" currentImage={formData.hero_image_url || siteConfig?.hero_image_url} onUpload={url => setFormData({...formData, hero_image_url: url})} />
+                    </section>
+
+                    <section className="space-y-6 pt-10 border-t border-gray-100">
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                        <LayoutDashboard size={20} className="text-primary" />
+                        <span>Statistiques Accueil</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Taux de réussite (%)</label>
+                          <input type="text" value={formData.stats?.success_rate || siteConfig?.stats?.success_rate || ''} onChange={e => setFormData({...formData, stats: {...(formData.stats || siteConfig?.stats || {}), success_rate: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Écoles partenaires</label>
+                          <input type="text" value={formData.stats?.partners_count || siteConfig?.stats?.partners_count || ''} onChange={e => setFormData({...formData, stats: {...(formData.stats || siteConfig?.stats || {}), partners_count: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Étudiants accompagnés</label>
+                          <input type="text" value={formData.stats?.students_count || siteConfig?.stats?.students_count || ''} onChange={e => setFormData({...formData, stats: {...(formData.stats || siteConfig?.stats || {}), students_count: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="space-y-6 pt-10 border-t border-gray-100">
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                        <FileText size={20} className="text-primary" />
+                        <span>Section Mission Accueil</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Titre Mission</label>
+                          <input type="text" value={formData.mission_title || siteConfig?.mission_title || ''} onChange={e => setFormData({...formData, mission_title: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        </div>
+                        <ImageUpload label="Image Mission" currentImage={formData.mission_image_url || siteConfig?.mission_image_url} onUpload={url => setFormData({...formData, mission_image_url: url})} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Texte Mission</label>
+                        <textarea value={formData.mission_text || siteConfig?.mission_text || ''} onChange={e => setFormData({...formData, mission_text: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none h-32" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Citation Mission</label>
+                        <input type="text" value={formData.mission_quote || siteConfig?.mission_quote || ''} onChange={e => setFormData({...formData, mission_quote: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                      </div>
+                    </section>
+
+                    <section className="space-y-6 pt-10 border-t border-gray-100">
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                        <Users size={20} className="text-primary" />
+                        <span>Page À Propos</span>
+                      </h3>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Texte Introduction À Propos</label>
+                        <textarea value={formData.about_text || siteConfig?.about_text || ''} onChange={e => setFormData({...formData, about_text: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none h-32" />
+                      </div>
+                      <ImageUpload label="Image À Propos" currentImage={formData.about_image_url || siteConfig?.about_image_url} onUpload={url => setFormData({...formData, about_image_url: url})} />
                     </section>
 
                     <section className="space-y-6 pt-10 border-t border-gray-100">
@@ -686,10 +813,14 @@ export default function Admin() {
                           <label className="text-sm font-bold text-gray-700">Téléphone</label>
                           <input type="text" value={formData.phone || siteConfig?.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">Adresse</label>
-                        <input type="text" value={formData.address || siteConfig?.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">WhatsApp (Lien complet)</label>
+                          <input type="text" value={formData.whatsapp || siteConfig?.whatsapp || ''} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Adresse Siège</label>
+                          <input type="text" value={formData.address || siteConfig?.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                        </div>
                       </div>
                     </section>
 
@@ -700,29 +831,33 @@ export default function Admin() {
                         className="bg-primary text-white px-10 py-4 rounded-2xl font-bold flex items-center space-x-2 hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                       >
                         {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-                        <span>{isSaving ? 'Enregistrement...' : 'Enregistrer les paramètres globaux'}</span>
+                        <span>{isSaving ? 'Enregistrement...' : 'Enregistrer la configuration'}</span>
                       </button>
                     </div>
                   </form>
                 </div>
               )}
 
-              {/* Testimonials & Destinations lists follow same pattern */}
-              {(activeTab === "testimonials" || activeTab === "destinations") && (
+              {/* Testimonials, Destinations & Branches lists follow same pattern */}
+              {(activeTab === "testimonials" || activeTab === "destinations" || activeTab === "branches") && (
                 <div className="grid grid-cols-1 gap-4">
-                  {(activeTab === "testimonials" ? testimonials : destinations).map((item: any) => (
+                  {(activeTab === "testimonials" ? testimonials : activeTab === "destinations" ? destinations : branches).map((item: any) => (
                     <div key={item.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
                       <div className="flex items-center space-x-4">
-                        {item.image || item.avatar ? (
+                        {activeTab !== "branches" && (item.image || item.avatar) ? (
                           <img src={item.image || item.avatar} alt="" className="w-12 h-12 rounded-xl object-cover" />
                         ) : (
                           <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                            <ImageIcon size={20} />
+                            {activeTab === "branches" ? <MapPin size={20} /> : <ImageIcon size={20} />}
                           </div>
                         )}
                         <div>
-                          <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
-                          <p className="text-sm text-gray-400 line-clamp-1">{item.content || item.description}</p>
+                          <h3 className="font-bold text-lg text-gray-900">
+                            {activeTab === "branches" ? `${item.city}, ${item.country}` : item.name}
+                          </h3>
+                          <p className="text-sm text-gray-400 line-clamp-1">
+                            {activeTab === "branches" ? item.address : (item.content || item.description)}
+                          </p>
                         </div>
                       </div>
                       <div className="flex space-x-2">
