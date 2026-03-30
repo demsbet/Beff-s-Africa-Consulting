@@ -745,7 +745,13 @@ export default function Admin() {
                           <label className="text-sm font-bold text-gray-700">Nom de l'Agence</label>
                           <input type="text" value={formData.name || siteConfig?.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
                         </div>
-                        <ImageUpload label="Logo du Site" currentImage={formData.logo_url || siteConfig?.logo_url} onUpload={url => setFormData({...formData, logo_url: url})} />
+                        <div className="space-y-4">
+                          <ImageUpload label="Logo du Site" currentImage={formData.logo_url || siteConfig?.logo_url} onUpload={url => setFormData({...formData, logo_url: url})} />
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-gray-400">Ou URL du Logo</label>
+                            <input type="text" value={formData.logo_url || siteConfig?.logo_url || ''} onChange={e => setFormData({...formData, logo_url: e.target.value})} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-primary outline-none" placeholder="https://..." />
+                          </div>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">Titre Hero Accueil</label>
@@ -755,7 +761,13 @@ export default function Admin() {
                         <label className="text-sm font-bold text-gray-700">Description Hero Accueil</label>
                         <textarea value={formData.hero_description || siteConfig?.hero_description || ''} onChange={e => setFormData({...formData, hero_description: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none h-24" />
                       </div>
-                      <ImageUpload label="Image Hero Accueil" currentImage={formData.hero_image_url || siteConfig?.hero_image_url} onUpload={url => setFormData({...formData, hero_image_url: url})} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <ImageUpload label="Image Hero Accueil" currentImage={formData.hero_image_url || siteConfig?.hero_image_url} onUpload={url => setFormData({...formData, hero_image_url: url})} />
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Ou URL de l'image Hero</label>
+                          <input type="text" value={formData.hero_image_url || siteConfig?.hero_image_url || ''} onChange={e => setFormData({...formData, hero_image_url: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" placeholder="https://..." />
+                        </div>
+                      </div>
                     </section>
 
                     <section className="space-y-6 pt-10 border-t border-gray-100">
@@ -789,7 +801,13 @@ export default function Admin() {
                           <label className="text-sm font-bold text-gray-700">Titre Mission</label>
                           <input type="text" value={formData.mission_title || siteConfig?.mission_title || ''} onChange={e => setFormData({...formData, mission_title: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
                         </div>
-                        <ImageUpload label="Image Mission" currentImage={formData.mission_image_url || siteConfig?.mission_image_url} onUpload={url => setFormData({...formData, mission_image_url: url})} />
+                        <div className="space-y-4">
+                          <ImageUpload label="Image Mission" currentImage={formData.mission_image_url || siteConfig?.mission_image_url} onUpload={url => setFormData({...formData, mission_image_url: url})} />
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-gray-400">Ou URL de l'image Mission</label>
+                            <input type="text" value={formData.mission_image_url || siteConfig?.mission_image_url || ''} onChange={e => setFormData({...formData, mission_image_url: e.target.value})} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-primary outline-none" placeholder="https://..." />
+                          </div>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">Texte Mission</label>
@@ -810,7 +828,13 @@ export default function Admin() {
                         <label className="text-sm font-bold text-gray-700">Texte Introduction À Propos</label>
                         <textarea value={formData.about_text || siteConfig?.about_text || ''} onChange={e => setFormData({...formData, about_text: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none h-32" />
                       </div>
-                      <ImageUpload label="Image À Propos" currentImage={formData.about_image_url || siteConfig?.about_image_url} onUpload={url => setFormData({...formData, about_image_url: url})} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <ImageUpload label="Image À Propos" currentImage={formData.about_image_url || siteConfig?.about_image_url} onUpload={url => setFormData({...formData, about_image_url: url})} />
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-gray-700">Ou URL de l'image À Propos</label>
+                          <input type="text" value={formData.about_image_url || siteConfig?.about_image_url || ''} onChange={e => setFormData({...formData, about_image_url: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" placeholder="https://..." />
+                        </div>
+                      </div>
                     </section>
 
                     <section className="space-y-6 pt-10 border-t border-gray-100">
