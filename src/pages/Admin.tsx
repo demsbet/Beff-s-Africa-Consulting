@@ -222,9 +222,24 @@ export default function Admin() {
 
     try {
       if (activeTab === 'contact') {
-        // Remove branches and other potentially non-db fields from config save
-        const { branches, ...configToSave } = formData;
-        const { error } = await supabase.from('site_config').upsert({ id: 1, ...configToSave });
+        // STRICT FILTERING: Only send fields that belong to site_config
+        const allowedKeys = [
+          'name', 'logo_url', 'hero_title', 'hero_description', 'hero_image_url',
+          'stats', 'mission_title', 'mission_text', 'mission_quote', 'mission_image_url',
+          'why_title', 'why_points', 'why_image_url_1', 'why_image_url_2',
+          'about_text', 'about_image_url', 'address', 'phone', 'whatsapp', 'email', 'socials'
+        ];
+        
+        const configToSave: any = { id: 1 };
+        allowedKeys.forEach(key => {
+          if (formData[key] !== undefined) {
+            configToSave[key] = formData[key];
+          } else if (siteConfig && siteConfig[key] !== undefined) {
+            configToSave[key] = siteConfig[key];
+          }
+        });
+
+        const { error } = await supabase.from('site_config').upsert(configToSave);
         if (error) throw error;
       } else if (isEditing === 'new') {
         const { error } = await supabase.from(tableName).insert([formData]);
@@ -406,7 +421,11 @@ export default function Admin() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => { setActiveTab(tab.id); setIsEditing(false); }}
+              onClick={() => { 
+                setActiveTab(tab.id); 
+                setIsEditing(false); 
+                setFormData({}); // Reset form data when switching tabs
+              }}
               className={cn(
                 "w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all",
                 activeTab === tab.id
