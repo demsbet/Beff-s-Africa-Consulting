@@ -189,34 +189,38 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-4xl font-bold mb-8 leading-tight">Pourquoi choisir Beff’s Africa Consulting ?</h2>
+              <h2 className="text-4xl font-bold mb-8 leading-tight">
+                {siteConfig.why_title || "Pourquoi choisir Beff’s Africa Consulting ?"}
+              </h2>
               <div className="space-y-8">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-secondary text-gray-900 rounded-xl flex items-center justify-center shrink-0 font-bold text-xl">01</div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Expertise & Réseau</h4>
-                    <p className="text-white/80">Plus de 50 écoles partenaires en Europe et des accords directs pour sécuriser vos admissions.</p>
+                {(siteConfig.why_points || [
+                  { title: "Expertise & Réseau", description: "Plus de 50 écoles partenaires en Europe et des accords directs pour sécuriser vos admissions." },
+                  { title: "Accompagnement de Proximité", description: "Une agence basée à Douala pour un suivi humain, direct et personnalisé avec les parents et étudiants." },
+                  { title: "Réussite Garantie", description: "Un taux de succès exceptionnel pour les admissions et les visas grâce à notre rigueur administrative." }
+                ]).map((point, i) => (
+                  <div key={i} className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-secondary text-gray-900 rounded-xl flex items-center justify-center shrink-0 font-bold text-xl">0{i + 1}</div>
+                    <div>
+                      <h4 className="text-xl font-bold mb-2">{point.title}</h4>
+                      <p className="text-white/80">{point.description}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-secondary text-gray-900 rounded-xl flex items-center justify-center shrink-0 font-bold text-xl">02</div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Accompagnement de Proximité</h4>
-                    <p className="text-white/80">Une agence basée à Douala pour un suivi humain, direct et personnalisé avec les parents et étudiants.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-secondary text-gray-900 rounded-xl flex items-center justify-center shrink-0 font-bold text-xl">03</div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Réussite Garantie</h4>
-                    <p className="text-white/80">Un taux de succès exceptionnel pour les admissions et les visas grâce à notre rigueur administrative.</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <img src="https://picsum.photos/seed/student1/400/500" alt="Student" className="rounded-3xl mt-12" referrerPolicy="no-referrer" />
-              <img src="https://picsum.photos/seed/student2/400/500" alt="Student" className="rounded-3xl" referrerPolicy="no-referrer" />
+              <img 
+                src={siteConfig.why_image_url_1 || "https://picsum.photos/seed/student1/400/500"} 
+                alt="Student" 
+                className="rounded-3xl mt-12 w-full h-full object-cover" 
+                referrerPolicy="no-referrer" 
+              />
+              <img 
+                src={siteConfig.why_image_url_2 || "https://picsum.photos/seed/student2/400/500"} 
+                alt="Student" 
+                className="rounded-3xl w-full h-full object-cover" 
+                referrerPolicy="no-referrer" 
+              />
             </div>
           </div>
         </div>
@@ -244,9 +248,13 @@ export default function Home() {
                 </div>
                 <p className="text-xl text-gray-700 italic mb-8 relative z-10">"{t.content}"</p>
                 <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {t.name.charAt(0)}
-                  </div>
+                  {t.image || t.avatar ? (
+                    <img src={t.image || t.avatar} alt={t.name} className="w-14 h-14 rounded-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      {t.name.charAt(0)}
+                    </div>
+                  )}
                   <div>
                     <h4 className="font-bold text-gray-900">{t.name}</h4>
                     <p className="text-sm text-primary font-medium">{t.program} — {t.destination}</p>

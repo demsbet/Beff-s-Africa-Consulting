@@ -836,6 +836,74 @@ export default function Admin() {
 
                     <section className="space-y-6 pt-10 border-t border-gray-100">
                       <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                        <CheckCircle size={20} className="text-primary" />
+                        <span>Section Pourquoi Nous Choisir</span>
+                      </h3>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">Titre de la section</label>
+                        <input type="text" value={formData.why_title || siteConfig?.why_title || ''} onChange={e => setFormData({...formData, why_title: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none" />
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <label className="text-sm font-bold text-gray-700">Points forts (3 points)</label>
+                        {[0, 1, 2].map((i) => (
+                          <div key={i} className="p-4 bg-gray-50 rounded-2xl space-y-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <div className="w-8 h-8 bg-secondary text-gray-900 rounded-lg flex items-center justify-center font-bold text-sm">0{i+1}</div>
+                              <span className="font-bold text-gray-700">Point {i+1}</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <label className="text-xs font-bold text-gray-400 uppercase">Titre</label>
+                                <input 
+                                  type="text" 
+                                  value={formData.why_points?.[i]?.title || siteConfig?.why_points?.[i]?.title || ''} 
+                                  onChange={e => {
+                                    const newPoints = [...(formData.why_points || siteConfig?.why_points || [{}, {}, {}])];
+                                    newPoints[i] = { ...newPoints[i], title: e.target.value };
+                                    setFormData({...formData, why_points: newPoints});
+                                  }} 
+                                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary outline-none text-sm" 
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-xs font-bold text-gray-400 uppercase">Description</label>
+                                <input 
+                                  type="text" 
+                                  value={formData.why_points?.[i]?.description || siteConfig?.why_points?.[i]?.description || ''} 
+                                  onChange={e => {
+                                    const newPoints = [...(formData.why_points || siteConfig?.why_points || [{}, {}, {}])];
+                                    newPoints[i] = { ...newPoints[i], description: e.target.value };
+                                    setFormData({...formData, why_points: newPoints});
+                                  }} 
+                                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-primary outline-none text-sm" 
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <ImageUpload label="Image 1 (Gauche)" currentImage={formData.why_image_url_1 || siteConfig?.why_image_url_1} onUpload={url => setFormData({...formData, why_image_url_1: url})} />
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-gray-400">Ou URL Image 1</label>
+                            <input type="text" value={formData.why_image_url_1 || siteConfig?.why_image_url_1 || ''} onChange={e => setFormData({...formData, why_image_url_1: e.target.value})} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-primary outline-none" placeholder="https://..." />
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <ImageUpload label="Image 2 (Droite)" currentImage={formData.why_image_url_2 || siteConfig?.why_image_url_2} onUpload={url => setFormData({...formData, why_image_url_2: url})} />
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-gray-400">Ou URL Image 2</label>
+                            <input type="text" value={formData.why_image_url_2 || siteConfig?.why_image_url_2 || ''} onChange={e => setFormData({...formData, why_image_url_2: e.target.value})} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-primary outline-none" placeholder="https://..." />
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="space-y-6 pt-10 border-t border-gray-100">
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
                         <Users size={20} className="text-primary" />
                         <span>Page À Propos</span>
                       </h3>
