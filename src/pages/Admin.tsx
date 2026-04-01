@@ -140,12 +140,12 @@ export default function Admin() {
           { data: branchesData },
           { data: configData }
         ] = await Promise.all([
-          supabase.from('services').select('*').order('order', { ascending: true }),
-          supabase.from('testimonials').select('*').order('created_at', { ascending: false }),
-          supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
-          supabase.from('destinations').select('*').order('created_at', { ascending: false }),
-          supabase.from('branches').select('*').order('country', { ascending: true }),
-          supabase.from('site_config').select('*').eq('id', 1).single()
+          supabase.from('services').select('*'),
+          supabase.from('testimonials').select('*'),
+          supabase.from('blog_posts').select('*'),
+          supabase.from('destinations').select('*'),
+          supabase.from('branches').select('*'),
+          supabase.from('site_config').select('*').eq('id', 1).maybeSingle()
         ]);
 
         if (servicesData) setServices(servicesData as Service[]);
@@ -153,7 +153,13 @@ export default function Admin() {
         if (blogData) setBlogPosts(blogData as BlogPost[]);
         if (destinationsData) setDestinations(destinationsData as Destination[]);
         if (branchesData) setBranches(branchesData as Branch[]);
-        if (configData) setSiteConfig(configData as SiteConfig);
+        
+        if (configData) {
+          setSiteConfig(configData as SiteConfig);
+        } else if (activeTab === 'contact') {
+          // If no config exists and we are on contact tab, we'll create it on save
+          console.log("No site config found, will be created on first save");
+        }
       } catch (error) {
         console.error("Fetch error:", error);
         toast.error("Erreur lors du chargement des données");
@@ -176,6 +182,12 @@ export default function Admin() {
       channels.forEach(channel => channel.unsubscribe());
     };
   }, [user, isAdminAuthenticated, isSupabaseConfigured]);
+
+  useEffect(() => {
+    if (activeTab === 'contact' && siteConfig && Object.keys(formData).length === 0) {
+      setFormData(siteConfig);
+    }
+  }, [activeTab, siteConfig]);
 
   const handleSupabaseError = (error: any, operationType: string, path: string | null) => {
     console.error('Supabase Error: ', error);
@@ -210,7 +222,9 @@ export default function Admin() {
 
     try {
       if (activeTab === 'contact') {
-        const { error } = await supabase.from('site_config').update(formData).eq('id', 1);
+        // Remove branches and other potentially non-db fields from config save
+        const { branches, ...configToSave } = formData;
+        const { error } = await supabase.from('site_config').upsert({ id: 1, ...configToSave });
         if (error) throw error;
       } else if (isEditing === 'new') {
         const { error } = await supabase.from(tableName).insert([formData]);
@@ -220,9 +234,10 @@ export default function Admin() {
         if (error) throw error;
       }
       setIsEditing(false);
-      setFormData({});
+      if (activeTab !== 'contact') setFormData({});
       toast.success('Enregistré avec succès !');
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Detailed Supabase Error:", error);
       handleSupabaseError(error, 'WRITE', `${tableName}/${docId || 'new'}`);
     } finally {
       setIsSaving(false);

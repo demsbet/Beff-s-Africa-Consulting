@@ -31,12 +31,12 @@ export function useFirebaseData() {
           { data: branchesData },
           { data: configData }
         ] = await Promise.all([
-          supabase.from('services').select('*').order('order', { ascending: true }),
-          supabase.from('testimonials').select('*').order('created_at', { ascending: false }),
-          supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
-          supabase.from('destinations').select('*').order('created_at', { ascending: false }),
-          supabase.from('branches').select('*').order('country', { ascending: true }),
-          supabase.from('site_config').select('*').eq('id', 1).single()
+          supabase.from('services').select('*'),
+          supabase.from('testimonials').select('*'),
+          supabase.from('blog_posts').select('*'),
+          supabase.from('destinations').select('*'),
+          supabase.from('branches').select('*'),
+          supabase.from('site_config').select('*').eq('id', 1).maybeSingle()
         ]);
 
         if (servicesData) setServices(servicesData as Service[]);
@@ -51,6 +51,8 @@ export function useFirebaseData() {
             config.branches = branchesData as Branch[];
           }
           setSiteConfig(config);
+        } else {
+          console.log('No site configuration found in Supabase. Using static fallbacks.');
         }
       } catch (error) {
         console.error('Error fetching data from Supabase:', error);
