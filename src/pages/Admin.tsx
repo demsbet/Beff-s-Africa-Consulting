@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { 
   LayoutDashboard, FileText, Users, MessageSquare, Settings, 
   Plus, Edit, Trash2, Save, X, LogIn, LogOut, Globe, MapPin, Image as ImageIcon,
-  Loader2, AlertCircle, CheckCircle2
+  Loader2, AlertCircle, CheckCircle2, CheckCircle
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { supabase } from "../lib/supabase";
@@ -857,9 +857,11 @@ export default function Admin() {
                                 <label className="text-xs font-bold text-gray-400 uppercase">Titre</label>
                                 <input 
                                   type="text" 
-                                  value={formData.why_points?.[i]?.title || siteConfig?.why_points?.[i]?.title || ''} 
+                                  value={Array.isArray(formData.why_points) ? (formData.why_points[i]?.title || '') : (Array.isArray(siteConfig?.why_points) ? (siteConfig?.why_points[i]?.title || '') : '')} 
                                   onChange={e => {
-                                    const newPoints = [...(formData.why_points || siteConfig?.why_points || [{}, {}, {}])];
+                                    const currentPoints = Array.isArray(formData.why_points) ? formData.why_points : (Array.isArray(siteConfig?.why_points) ? siteConfig?.why_points : [{}, {}, {}]);
+                                    const newPoints = [...currentPoints];
+                                    while(newPoints.length <= i) newPoints.push({});
                                     newPoints[i] = { ...newPoints[i], title: e.target.value };
                                     setFormData({...formData, why_points: newPoints});
                                   }} 
@@ -870,9 +872,11 @@ export default function Admin() {
                                 <label className="text-xs font-bold text-gray-400 uppercase">Description</label>
                                 <input 
                                   type="text" 
-                                  value={formData.why_points?.[i]?.description || siteConfig?.why_points?.[i]?.description || ''} 
+                                  value={Array.isArray(formData.why_points) ? (formData.why_points[i]?.description || '') : (Array.isArray(siteConfig?.why_points) ? (siteConfig?.why_points[i]?.description || '') : '')} 
                                   onChange={e => {
-                                    const newPoints = [...(formData.why_points || siteConfig?.why_points || [{}, {}, {}])];
+                                    const currentPoints = Array.isArray(formData.why_points) ? formData.why_points : (Array.isArray(siteConfig?.why_points) ? siteConfig?.why_points : [{}, {}, {}]);
+                                    const newPoints = [...currentPoints];
+                                    while(newPoints.length <= i) newPoints.push({});
                                     newPoints[i] = { ...newPoints[i], description: e.target.value };
                                     setFormData({...formData, why_points: newPoints});
                                   }} 
