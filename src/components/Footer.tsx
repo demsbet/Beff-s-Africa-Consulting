@@ -53,7 +53,6 @@ export default function Footer() {
               <div className={cn("logo-fallback w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl", siteConfig.logo_url ? "hidden" : "")}>
                 {siteConfig.name.charAt(0)}
               </div>
-              <span className="font-bold text-xl tracking-tight">{siteConfig.name.split(' ')[0]} {siteConfig.name.split(' ')[1] || ''}</span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               Ouvrir les portes du monde à la jeunesse africaine à travers un accompagnement sur mesure, humain et inspirant.
@@ -150,7 +149,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-xs">
-          <p>© {new Date().getFullYear()} Beff’s Africa Consulting Group. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.</p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <Link to="/mentions-legales" className="hover:text-gray-300">Mentions Légales</Link>
             <Link to="/confidentialite" className="hover:text-gray-300">Confidentialité</Link>

@@ -1,7 +1,7 @@
 import { Service, Testimonial, BlogPost, Destination, SiteConfig } from "./types";
 
 export const siteConfig: SiteConfig = {
-  name: "Beff’s Africa Consulting Group",
+  name: "Consulting Group",
   address: "Douala, Cameroun – Bonamoussadi, Ancienne Mairie, 3ème étage",
   phone: "+237 6 92 44 98 74",
   whatsapp: "https://wa.me/237676140933",
@@ -117,7 +117,7 @@ export const testimonials: Testimonial[] = [
     name: "Samuel N.",
     destination: "France",
     program: "Master en Management",
-    content: "Grâce à Beff's Africa, j'ai pu intégrer une grande école de commerce à Paris. Leur accompagnement pour le visa a été déterminant."
+    content: "Grâce à l'agence, j'ai pu intégrer une grande école de commerce à Paris. Leur accompagnement pour le visa a été déterminant."
   },
   {
     id: "2",

@@ -47,7 +47,10 @@ export default function Navbar() {
               <img 
                 src={siteConfig.logo_url} 
                 alt={siteConfig.name} 
-                className="h-12 w-auto"
+                className={cn(
+                  "h-12 w-auto transition-all duration-300",
+                  !(scrolled || !isHomePage || location.pathname === '/admin') && "brightness-0 invert"
+                )}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.parentElement!.querySelector('.logo-fallback')!.classList.remove('hidden');
@@ -57,12 +60,6 @@ export default function Navbar() {
             <div className={cn("logo-fallback w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl", siteConfig.logo_url ? "hidden" : "")}>
               {siteConfig.name.charAt(0)}
             </div>
-            <span className={cn(
-              "font-bold text-xl tracking-tight hidden sm:block",
-              (scrolled || !isHomePage || location.pathname === '/admin') ? "text-gray-900" : "text-white"
-            )}>
-              {siteConfig.name.split(' ')[0]} {siteConfig.name.split(' ')[1] || ''}
-            </span>
           </Link>
 
           {/* Desktop Nav */}

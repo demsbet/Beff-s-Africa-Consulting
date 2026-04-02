@@ -190,7 +190,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl font-bold mb-8 leading-tight">
-                {siteConfig.why_title || "Pourquoi choisir Beff’s Africa Consulting ?"}
+                {siteConfig.why_title || "Pourquoi choisir notre agence ?"}
               </h2>
               <div className="space-y-8">
                 {(siteConfig.why_points || [

@@ -79,7 +79,7 @@ export default function About() {
             <h2 className="text-4xl font-bold text-center">Notre Histoire</h2>
             <div className="space-y-8 text-lg text-white/80 leading-relaxed">
               <p>
-                Beff’s Africa Consulting Group est né d'un constat simple : le potentiel immense de la jeunesse africaine se heurte trop souvent à des barrières administratives et informationnelles complexes.
+                Notre agence est née d'un constat simple : le potentiel immense de la jeunesse africaine se heurte trop souvent à des barrières administratives et informationnelles complexes.
               </p>
               <p>
                 Fondée par des experts de l'éducation internationale, notre agence s'est rapidement imposée comme une référence à Douala. Nous avons bâti un réseau solide de partenaires en Europe, nous permettant d'offrir des garanties d'admission uniques.

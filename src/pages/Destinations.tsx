@@ -83,10 +83,10 @@ export default function Destinations() {
           </div>
         </div>
 
-        {/* Why Beff's Africa */}
+        {/* Why Choose Us */}
         <div className="bg-gray-50 rounded-[4rem] p-16 md:p-24 border border-gray-100">
           <div className="max-w-4xl mx-auto text-center space-y-12">
-            <h2 className="text-4xl font-bold text-gray-900">Pourquoi partir avec Beff’s Africa ?</h2>
+            <h2 className="text-4xl font-bold text-gray-900">Pourquoi partir avec nous ?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
               <div className="space-y-4">
                 <h4 className="text-xl font-bold text-primary">Sécurité & Fiabilité</h4>

@@ -452,7 +452,7 @@ export default function Admin() {
       {/* Sidebar */}
       <aside className="w-72 bg-white border-r border-gray-200 hidden md:flex flex-col h-full">
         <div className="p-8 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">Beff's Africa</h2>
+          <h2 className="text-xl font-bold text-gray-900">Administration</h2>
           <p className="text-xs text-gray-400 uppercase tracking-widest mt-1 font-semibold">Console de Gestion</p>
         </div>
         <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
