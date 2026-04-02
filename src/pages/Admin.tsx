@@ -247,7 +247,11 @@ export default function Admin() {
         const { error } = await supabase.from('site_config').upsert(configToSave);
         if (error) throw error;
       } else if (isEditing === 'new') {
-        const { error } = await supabase.from(tableName).insert([formData]);
+        const dataToInsert = { ...formData };
+        if (!dataToInsert.id) {
+          dataToInsert.id = crypto.randomUUID();
+        }
+        const { error } = await supabase.from(tableName).insert([dataToInsert]);
         if (error) throw error;
       } else if (docId) {
         const { error } = await supabase.from(tableName).update(formData).eq('id', docId);
