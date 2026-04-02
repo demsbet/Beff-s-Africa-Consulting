@@ -191,7 +191,8 @@ export default function Admin() {
 
   const handleSupabaseError = (error: any, operationType: string, path: string | null) => {
     console.error('Supabase Error: ', error);
-    toast.error(`Erreur lors de l'opération ${operationType} sur ${path}`);
+    const message = error?.message || error?.details || "Erreur inconnue";
+    toast.error(`Erreur ${operationType} sur ${path}: ${message}`);
   };
 
   const handlePasswordLogin = () => {
@@ -232,10 +233,14 @@ export default function Admin() {
         
         const configToSave: any = { id: 1 };
         allowedKeys.forEach(key => {
-          if (formData[key] !== undefined) {
-            configToSave[key] = formData[key];
-          } else if (siteConfig && siteConfig[key] !== undefined) {
-            configToSave[key] = siteConfig[key];
+          let value = formData[key] !== undefined ? formData[key] : (siteConfig ? siteConfig[key] : undefined);
+          if (value !== undefined) {
+            // Stringify objects/arrays to ensure compatibility with text columns
+            if (typeof value === 'object' && value !== null) {
+              configToSave[key] = JSON.stringify(value);
+            } else {
+              configToSave[key] = value;
+            }
           }
         });
 

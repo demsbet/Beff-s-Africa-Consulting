@@ -46,11 +46,23 @@ export function useFirebaseData() {
         if (branchesData) setBranches(branchesData as Branch[]);
         
         if (configData) {
-          const config = configData as SiteConfig;
+          const config = { ...configData } as any;
+          
+          // Parse stringified JSON fields if necessary
+          ['stats', 'why_points', 'socials'].forEach(key => {
+            if (typeof config[key] === 'string') {
+              try {
+                config[key] = JSON.parse(config[key]);
+              } catch (e) {
+                console.error(`Error parsing ${key}:`, e);
+              }
+            }
+          });
+
           if (branchesData) {
             config.branches = branchesData as Branch[];
           }
-          setSiteConfig(config);
+          setSiteConfig(config as SiteConfig);
         } else {
           console.log('No site configuration found in Supabase. Using static fallbacks.');
         }
