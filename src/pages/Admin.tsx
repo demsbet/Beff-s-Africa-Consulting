@@ -248,9 +248,38 @@ export default function Admin() {
         if (error) throw error;
       } else if (isEditing === 'new') {
         const dataToInsert = { ...formData };
-        if (!dataToInsert.id) {
-          dataToInsert.id = crypto.randomUUID();
+        
+        // Ensure required fields for destinations
+        if (activeTab === 'destinations') {
+          dataToInsert.name = dataToInsert.name || 'Nouvelle Destination';
+          dataToInsert.description = dataToInsert.description || '';
+          dataToInsert.image = dataToInsert.image || '';
         }
+        
+        // Ensure required fields for services
+        if (activeTab === 'services') {
+          dataToInsert.title = dataToInsert.title || 'Nouveau Service';
+          dataToInsert.description = dataToInsert.description || '';
+          dataToInsert.icon = dataToInsert.icon || 'Globe';
+        }
+
+        // Ensure required fields for blog
+        if (activeTab === 'blog') {
+          dataToInsert.title = dataToInsert.title || 'Nouvel Article';
+          dataToInsert.excerpt = dataToInsert.excerpt || '';
+          dataToInsert.content = dataToInsert.content || '';
+          dataToInsert.date = dataToInsert.date || new Date().toISOString().split('T')[0];
+          dataToInsert.image = dataToInsert.image || '';
+        }
+
+        // Ensure required fields for testimonials
+        if (activeTab === 'testimonials') {
+          dataToInsert.name = dataToInsert.name || 'Anonyme';
+          dataToInsert.content = dataToInsert.content || '';
+          dataToInsert.destination = dataToInsert.destination || '';
+          dataToInsert.program = dataToInsert.program || '';
+        }
+
         const { error } = await supabase.from(tableName).insert([dataToInsert]);
         if (error) throw error;
       } else if (docId) {
