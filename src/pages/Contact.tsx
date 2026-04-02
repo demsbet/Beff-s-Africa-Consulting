@@ -1,10 +1,122 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { useFirebaseData } from "../lib/hooks";
-import { MapPin, Phone, Mail, MessageCircle, Send, Globe, Facebook, Instagram, Twitter } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle, Send, Globe, Facebook, Instagram, Twitter, User, Briefcase, Loader2, Users, GraduationCap, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "../lib/supabase";
+import { cn } from "../lib/utils";
 
 export default function Contact() {
   const { siteConfig } = useFirebaseData();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    whatsapp: "",
+    email: "",
+    city: "",
+    country: "",
+    parentWhatsapp: "",
+    academicLevel: "Terminale / Baccalauréat",
+    major: "",
+    lastDegreeYear: "",
+    desiredField: "",
+    startDate: "Prochaine rentrée",
+    campusFranceHistory: "Non",
+    motivation: "",
+    readyForPrivateSchool: "Oui",
+    contactPreference: "Aujourd’hui",
+    confirmation: false
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    setFormData(prev => ({ ...prev, [name]: val }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.whatsapp || !formData.email || !formData.city || !formData.country || !formData.parentWhatsapp || !formData.desiredField || !formData.confirmation) {
+      toast.error("Veuillez remplir tous les champs obligatoires et confirmer votre intérêt.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Enregistrement dans Supabase (votre base de données actuelle)
+      const { error } = await supabase.from('contact_messages').insert([
+        { 
+          name: formData.name,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          city: formData.city,
+          country: formData.country,
+          parent_whatsapp: formData.parentWhatsapp,
+          academic_level: formData.academicLevel,
+          major: formData.major,
+          last_degree_year: formData.lastDegreeYear,
+          desired_field: formData.desiredField,
+          start_date: formData.startDate,
+          campus_france_history: formData.campusFranceHistory,
+          motivation: formData.motivation,
+          ready_for_private_school: formData.readyForPrivateSchool,
+          contact_preference: formData.contactPreference,
+          created_at: new Date().toISOString()
+        }
+      ]);
+
+      if (error) {
+        console.warn("Erreur Supabase:", error.message);
+      }
+
+      // 2. Envoi vers Google Sheets via Webhook
+      const webhookUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Important pour Google Apps Script
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...formData,
+              submittedAt: new Date().toLocaleString('fr-FR')
+            }),
+          });
+        } catch (webhookErr) {
+          console.error("Erreur Webhook Google Sheets:", webhookErr);
+        }
+      }
+
+      toast.success("Votre demande a été envoyée avec succès ! Un conseiller vous contactera bientôt.");
+      setFormData({
+        name: "",
+        whatsapp: "",
+        email: "",
+        city: "",
+        country: "",
+        parentWhatsapp: "",
+        academicLevel: "Terminale / Baccalauréat",
+        major: "",
+        lastDegreeYear: "",
+        desiredField: "",
+        startDate: "Prochaine rentrée",
+        campusFranceHistory: "Non",
+        motivation: "",
+        readyForPrivateSchool: "Oui",
+        contactPreference: "Aujourd’hui",
+        confirmation: false
+      });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Une erreur est survenue. Veuillez réessayer plus tard.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!siteConfig) return null;
 
@@ -114,60 +226,281 @@ export default function Contact() {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-gray-50 p-10 md:p-16 rounded-[2rem] border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Envoyez-nous un message</h2>
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Nom Complet</label>
-                  <input
-                    type="text"
-                    placeholder="Votre nom"
-                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                  />
+          <div className="bg-gray-50 p-8 md:p-12 rounded-[2rem] border border-gray-100 shadow-sm">
+            <div className="mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Formulaire d'Admission</h2>
+              <p className="text-gray-600">Remplissez ce formulaire pour lancer votre projet d'études en France.</p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-12">
+              {/* Informations personnelles */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-primary flex items-center gap-2 border-b pb-2">
+                  <User size={20} />
+                  Informations personnelles
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Nom et prénom <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="Votre nom complet"
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Numéro WhatsApp actif <span className="text-red-500">*</span></label>
+                    <input
+                      type="tel"
+                      name="whatsapp"
+                      value={formData.whatsapp}
+                      onChange={handleChange}
+                      required
+                      placeholder="+237 ..."
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                    />
+                  </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Email <span className="text-red-500">*</span></label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      placeholder="votre@email.com"
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Ville de résidence <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      required
+                      placeholder="Ex: Douala"
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Pays de résidence <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required
+                      placeholder="Ex: Cameroun"
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact du parent */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-primary flex items-center gap-2 border-b pb-2">
+                  <Users size={20} />
+                  Contact du parent ou tuteur
+                </h3>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Email</label>
+                  <label className="text-sm font-bold text-gray-700 ml-1">Numéro WhatsApp du parent ou tuteur <span className="text-red-500">*</span></label>
                   <input
-                    type="email"
-                    placeholder="votre@email.com"
-                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    type="tel"
+                    name="parentWhatsapp"
+                    value={formData.parentWhatsapp}
+                    onChange={handleChange}
+                    required
+                    placeholder="+237 ..."
+                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Téléphone</label>
-                  <input
-                    type="tel"
-                    placeholder="+237 ..."
-                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                  />
+
+              {/* Profil académique */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-primary flex items-center gap-2 border-b pb-2">
+                  <GraduationCap size={20} />
+                  Profil académique
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Niveau d’étude actuel</label>
+                    <select 
+                      name="academicLevel"
+                      value={formData.academicLevel}
+                      onChange={handleChange}
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white cursor-pointer"
+                    >
+                      <option>Terminale / Baccalauréat</option>
+                      <option>Licence</option>
+                      <option>Master</option>
+                      <option>Autre</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Série ou filière actuelle</label>
+                    <input
+                      type="text"
+                      name="major"
+                      value={formData.major}
+                      onChange={handleChange}
+                      placeholder="Ex: Scientifique, Gestion..."
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-1">Type de Projet</label>
-                  <select className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none bg-white">
-                    <option>Études en Europe</option>
-                    <option>Orientation</option>
-                    <option>Visa / Dossier</option>
-                    <option>Autre</option>
+                  <label className="text-sm font-bold text-gray-700 ml-1">Année d’obtention du dernier diplôme</label>
+                  <input
+                    type="text"
+                    name="lastDegreeYear"
+                    value={formData.lastDegreeYear}
+                    onChange={handleChange}
+                    placeholder="Ex: 2023"
+                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Projet d’étude en France */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-primary flex items-center gap-2 border-b pb-2">
+                  <Globe size={20} />
+                  Projet d’étude en France
+                </h3>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 ml-1">Domaine d’étude souhaité en France <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    name="desiredField"
+                    value={formData.desiredField}
+                    onChange={handleChange}
+                    required
+                    placeholder="Ex: Ingénierie, Commerce, Santé..."
+                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Pour quelle rentrée souhaitez-vous partir ?</label>
+                    <select 
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleChange}
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white cursor-pointer"
+                    >
+                      <option>Prochaine rentrée</option>
+                      <option>Dès que possible</option>
+                      <option>Je me renseigne encore</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Avez-vous déjà tenté une procédure Campus France ?</label>
+                    <select 
+                      name="campusFranceHistory"
+                      value={formData.campusFranceHistory}
+                      onChange={handleChange}
+                      className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white cursor-pointer"
+                    >
+                      <option>Oui</option>
+                      <option>Non</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Qualification du candidat */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-primary flex items-center gap-2 border-b pb-2">
+                  <Briefcase size={20} />
+                  Qualification du candidat
+                </h3>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 ml-1">Pourquoi souhaitez-vous étudier en France ?</label>
+                  <textarea
+                    name="motivation"
+                    value={formData.motivation}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Vos motivations..."
+                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none bg-white"
+                  ></textarea>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 ml-1">Êtes-vous prêt(e) à lancer votre procédure d’admission dans une école privée ?</label>
+                  <select 
+                    name="readyForPrivateSchool"
+                    value={formData.readyForPrivateSchool}
+                    onChange={handleChange}
+                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white cursor-pointer"
+                  >
+                    <option>Oui</option>
+                    <option>Oui, j’aimerais d’abord parler avec un conseiller</option>
+                    <option>Je me renseigne encore</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 ml-1">Quand souhaitez-vous être contacté ?</label>
+                  <select 
+                    name="contactPreference"
+                    value={formData.contactPreference}
+                    onChange={handleChange}
+                    className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white cursor-pointer"
+                  >
+                    <option>Aujourd’hui</option>
+                    <option>Cette semaine</option>
+                    <option>Plus tard</option>
                   </select>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-1">Message</label>
-                <textarea
-                  rows={5}
-                  placeholder="Comment pouvons-nous vous aider ?"
-                  className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                ></textarea>
+
+              {/* Confirmation */}
+              <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative flex items-center mt-1">
+                    <input
+                      type="checkbox"
+                      name="confirmation"
+                      checked={formData.confirmation}
+                      onChange={handleChange}
+                      className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:bg-primary checked:border-primary transition-all"
+                    />
+                    <CheckCircle size={14} className="absolute text-white opacity-0 peer-checked:opacity-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+                    Je confirme être réellement intéressé(e) par une admission dans une école privée en France. <span className="text-red-500">*</span>
+                  </span>
+                </label>
               </div>
+
               <button
                 type="submit"
-                className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-lg hover:bg-primary-hover transition-all shadow-lg flex items-center justify-center space-x-2"
+                disabled={isSubmitting}
+                className={cn(
+                  "w-full bg-primary text-white py-5 rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center space-x-2",
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-primary-hover hover:shadow-primary/20 transform hover:-translate-y-1"
+                )}
               >
-                <span>Envoyer le message</span>
-                <Send size={20} />
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Envoi en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Soumettre ma candidature</span>
+                    <Send size={20} />
+                  </>
+                )}
               </button>
             </form>
           </div>
